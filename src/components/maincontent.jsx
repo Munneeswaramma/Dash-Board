@@ -13,19 +13,21 @@ import {
   FaTshirt,
   FaMobileAlt,
   FaBriefcase,
-  FaBars
+  FaBars,
 } from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSquareWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import { RiUserSearchLine } from 'react-icons/ri';
-import { PieChart } from 'react-minimal-pie-chart';
+
 
 
 const MainContent = ({ activeSection, setActiveSection, theme, toggleTheme, toggleSidebar }) => {
   const [showAllCategories, setShowAllCategories] = useState(false);
-  const [showStock, setShowStock] = useState(false);
   const [showAllProducts, setShowAllProducts] = useState(false);
   const [currentPromoIndex, setCurrentPromoIndex] = useState(0);
+  const [wishlist, setWishlist] = useState(new Set());
+  const [cart, setCart] = useState({});
+
   const [showAllNotifications, setShowAllNotifications] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const contactMailRef = useRef(null);
@@ -122,12 +124,41 @@ const MainContent = ({ activeSection, setActiveSection, theme, toggleTheme, togg
   ];
 
   const products = [
-    { img: '/apple.jpg', name: 'Red Apple', quantity: '10 kg', price: '₹80/kg' },
-    { img: '/carrot.jpg', name: 'Carrots', quantity: '5 kg', price: '₹50/kg' },
-    { img: '/tshirt.jpg', name: 'T-Shirt', quantity: '1', price: '₹399' },
-    { img: '/phone.jpg', name: 'Smartphone', quantity: '1', price: '₹12,999' },
-  ];
+  { id: 1, img: '/apple.jpg', name: 'Red Apple', quantity: '10 kg', price: '₹80/kg' },
+  { id: 2, img: '/carrot.jpg', name: 'Carrots', quantity: '5 kg', price: '₹50/kg' },
+  { id: 3, img: '/tshirt.jpg', name: 'T-Shirt', quantity: '1', price: '₹399' },
+  { id: 4, img: '/phone.jpg', name: 'Smartphone', quantity: '1', price: '₹12,999' },
+];
+
   const visibleProducts = showAllProducts ? products : products.slice(0, 3);
+  const toggleWishlist = (productId) => {
+  setWishlist(prev => {
+    const newSet = new Set(prev);
+    if (newSet.has(productId)) {
+      newSet.delete(productId);
+    } else {
+      newSet.add(productId);
+    }
+    return newSet;
+  });
+};
+const [isAdding, setIsAdding] = useState(false);
+
+const handleAddToCart = (product) => {
+  if (isAdding) return;
+  setIsAdding(true);
+  setCart(prev => {
+    const updated = { ...prev };
+    if (updated[product.id]) return prev;
+    updated[product.id] = { quantity: 1, product };
+    return updated;
+  });
+  setTimeout(() => setIsAdding(false), 200);
+};
+
+
+
+
 
 
   return (
@@ -335,30 +366,113 @@ const MainContent = ({ activeSection, setActiveSection, theme, toggleTheme, togg
                   ))}
                 </div>
               </section>
+<section className="section">
+  <div className="section-header">
+    <h2 style={{ fontWeight: 'bold' }}>Products</h2>
+    <button className="view-all" onClick={() => setShowAllProducts(!showAllProducts)}>
+      {showAllProducts ? 'View Less' : 'View All'}
+    </button>
+  </div>
 
-              <section className="section">
-                <div className="section-header">
-                  <h2 style={{ fontWeight: 'bold' }}>Popular Products</h2>
-                  <button className="view-all" onClick={() => setShowAllProducts(!showAllProducts)}>
-                    {showAllProducts ? 'View Less' : 'See All'}
-                  </button>
-                </div>
-                <div className="product-card-grid">
-                  {visibleProducts.map((prod, idx) => (
-                    <div className="product-card" key={idx}> { }
-                      <img src={prod.img} alt={prod.name} className="product-image" style={{ width: '100%', height: '120px', objectFit: 'cover' }} />
-                      <h4>{prod.name}</h4>
-                      <p>Quantity: {prod.quantity}</p>
-                      <div className="price-cart">
-                        <span>{prod.price}</span>
-                        <button className="add-cart-btn" title="Add to Cart">
-                          <FaCartPlus />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
+  <div className="card-grid">
+    {visibleProducts.map((prod) => (
+      <div className="product-card" key={prod.id} style={{ position: 'relative' }}>
+        {/* Wishlist Icon */}
+        <button
+          className="wishlist-btn"
+          onClick={() => toggleWishlist(prod.id)}
+          style={{
+            position: 'absolute',
+            top: '8px',
+            right: '8px',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            color: wishlist.has(prod.id) ? 'red' : '#aaa',
+            fontSize: '1.2rem'
+          }}
+          title="Add to Wishlist"
+        >
+          <FaHeart />
+        </button>
+
+        <img
+          src={prod.img}
+          alt={prod.name}
+          className="product-image"
+          style={{ width: '100%', height: '120px', objectFit: 'cover' }}
+        />
+        <h4>{prod.name}</h4>
+        <p>Quantity: {prod.quantity}</p>
+
+        <div className="price-cart" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span>{prod.price}</span>
+
+          {/* Cart Controls */}
+          {!cart[prod.id] ? (
+           <button 
+  disabled={isAdding}
+  onClick={() => handleAddToCart(prod)}
+>
+<FaCartPlus  style={{color:'green',border:'1 px solid green'}}/>
+</button>
+
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <button
+                onClick={() => {
+                  setCart(prev => {
+                    const updated = { ...prev };
+                    updated[prod.id].quantity -= 1;
+                    if (updated[prod.id].quantity <= 0) {
+                      delete updated[prod.id];
+                    }
+                    return updated;
+                  });
+                }}
+                style={{
+                  padding: '4px 8px',
+                  background: '#eee',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                –
+              </button>
+              <span style={{ fontWeight: 'bold', minWidth: '20px', textAlign: 'center' }}>
+                {cart[prod.id].quantity}
+              </span>
+              <button
+                onClick={() => {
+                  setCart(prev => {
+                    const updated = { ...prev };
+                    updated[prod.id].quantity += 1;
+                    return updated;
+                  });
+                }}
+                style={{
+                  padding: '4px 8px',
+                  background: '#eee',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                +
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
+
+
+
+                  
+            
             </>
           )}
         </main>
@@ -415,7 +529,7 @@ const MainContent = ({ activeSection, setActiveSection, theme, toggleTheme, togg
             </div>
           </div>
 
-          {/* Orders section with colorful table */}
+          {}
           <section style={{ marginTop: "30px" }}>
             <h3 style={{ fontWeight: 'bold' }}>Latest Orders</h3>
             <table

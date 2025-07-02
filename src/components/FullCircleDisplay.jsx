@@ -2,7 +2,7 @@ import React from 'react';
 
 const CircleFill = ({ percent, size = 40, fillColor = '#4caf50', bgColor = 'var(--border-color)' }) => {
   const radius = size / 2;
-  const fillHeight = size * (1 - percent / 100); // vertical mask height
+  const fillHeight = size * (1 - percent / 100);
 
   return (
     <svg width={size} height={size}>
@@ -12,11 +12,11 @@ const CircleFill = ({ percent, size = 40, fillColor = '#4caf50', bgColor = 'var(
         </mask>
       </defs>
 
-      {/* Background circle */}
+      {}
       <circle cx={radius} cy={radius} r={radius} fill={bgColor} />
 
-      {/* Filled portion */}
-      <circle
+      {} 
+      <circle   
         cx={radius}
         cy={radius}
         r={radius}
