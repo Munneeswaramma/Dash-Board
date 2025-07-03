@@ -1,9 +1,26 @@
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: var(--primary-bg);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease; 
+  overflow-x: hidden;
+  overflow-y: auto;
 }
+
+/* Example: change layout for smaller screens */
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+  .content {
+    width: 100%;
+  }
+}
+
 :root {
   --primary-bg: #ffffff;       
   --secondary-bg: #f0f0f0;       
@@ -145,10 +162,18 @@ html[data-theme='dark'] {
   --notification-badge-ring: var(--header-bg);
   --accent-color: #4CAF50; 
 }
-html, body, #root {
-  height: 100%;
-  margin: 0;
+html, body {
+  height: auto;
+  min-height: 100vh;
+  overflow-x: hidden;   
+  overflow-y: auto;     
+}.content {
+  padding: 10px;        
+  max-width: 100%;
+  overflow-x: hidden;
 }
+
+
 
 body {
   font-family: 'Arial', sans-serif;
